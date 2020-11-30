@@ -27,32 +27,39 @@ class MainActivity : AppCompatActivity(), NewsItemClicked {
 
 
     private fun fetchData() {
-        val url = "http://newsapi.org/v2/everything?q=bitcoin&from=2020-10-29&sortBy=publishedAt&apiKey=71de2801cfaf4f53a09c73b0f9eec2a3"
-        val jsonObjectRequest = JsonObjectRequest(
+        //volly library
+        val url = "https://newsapi.org/v2/top-headlines?country=in&apiKey=71de2801cfaf4f53a09c73b0f9eec2a3"
+        //making a request
+        val jsonObjectRequest = object: JsonObjectRequest(
             Request.Method.GET,
             url,
             null,
             Response.Listener {
-                val newsJsonArray = it.getJSONArray("results")
+                val newsJsonArray = it.getJSONArray("articles")
                 val newsArray = ArrayList<News>()
-                for (i in 0 until newsJsonArray.length()) {
+                for(i in 0 until newsJsonArray.length()) {
                     val newsJsonObject = newsJsonArray.getJSONObject(i)
                     val news = News(
                         newsJsonObject.getString("title"),
                         newsJsonObject.getString("author"),
                         newsJsonObject.getString("url"),
-                        newsJsonObject.getString("urlToUrl")
+                        newsJsonObject.getString("urlToImage")
                     )
                     newsArray.add(news)
                 }
 
                 mAdapter.updateNews(newsArray)
-
             },
             Response.ErrorListener {
-
             }
-        )
+
+        ) {
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["User-Agent"] = "Mozilla/5.0"
+                return headers
+            }
+        }
 
         MySingleton.getInstance(this).addToRequestQueue(jsonObjectRequest)
     }
